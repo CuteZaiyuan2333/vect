@@ -1,6 +1,9 @@
 use crate::isa::{
-    Instructions,
-    Items,
+    calculations::Calculation, 
+    isa::{
+        Instructions,
+        Items,
+    },
 };
 
 pub struct Vectvm{
@@ -16,7 +19,6 @@ pub struct Vectvm{
     
     pub fn push(self: &mut Self, script: Vec<Items>){
         self.dropvec = script;
-        self.rewind();
     }
     
     pub fn rewind(self: &mut Self){
@@ -59,6 +61,7 @@ pub struct Vectvm{
                             Items::Recursion(recursion) =>{
                                 let mut subvm = Vectvm::init();
                                 subvm.push(*recursion);
+                                subvm.rewind();
                                 let check = subvm.evaluate();
                                 //检查递归展开之后是否是指令
                                 match check {
@@ -79,58 +82,7 @@ pub struct Vectvm{
                         //开始匹配指令
                         match op{
                             Items::Element(instruction) =>{
-                                match instruction{
-                                    //加法逻辑
-                                    Instructions::Add =>{
-                                        let pop = [self.scriptvec.pop(), self.scriptvec.pop()];
-                                        let mut value: i32 = 0;
-                                        for check in pop{
-                                            //检查是否有值
-                                            match check {
-                                                None =>{
-                                                    return Items::Error;
-                                                }
-                                                Some(_) =>{
-                                                    let number = check.unwrap();
-                                                    //检查值是否合法
-                                                    match number {
-                                                        //是数字则直接计算
-                                                        Items::Number(number) =>{
-                                                            value += number;
-                                                        }
-                                                        //是递归则展开
-                                                        Items::Recursion(recursion) =>{
-                                                            let mut subvm = Vectvm::init();
-                                                            subvm.push(*recursion);
-                                                            subvm.rewind();
-                                                            let check = subvm.evaluate();
-                                                            //检查展开后的递归是否是数字，如果是则进行计算，否则报错
-                                                            match check {
-                                                                Items::Number(result) =>{
-                                                                    value += result;
-                                                                }
-                                                                _ =>{
-                                                                    return Items::Error;
-                                                                }
-                                                            }
-                                                        }
-                                                        //如果不是递归或数字则报错
-                                                        _ =>{
-                                                            return Items::Error;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        return Items::Number(value);
-                                    }
-                                    Instructions::Jump =>{
-                                        todo!("暂未实现")
-                                    }
-                                    Instructions::Larger =>{
-                                        todo!("暂未实现")
-                                    }
-                                }
+                                return self.dec(instruction);
                             }
                             _ =>{
                                 return Items::Error;
@@ -141,4 +93,71 @@ pub struct Vectvm{
             }
         };
     }
+
+    pub fn dec(self: &mut Self, instruction: Instructions) -> Items{
+        match instruction {
+            Instructions::Cal(calculation) =>{
+                return self.alu(calculation);
+            }
+            Instructions::Jump =>{
+                todo!("暂未实现")
+            }
+            Instructions::Larger =>{
+                todo!("暂未实现")
+            }
+        }
+    }
+
+    pub fn alu(self: &mut Self, calculation: Calculation) -> Items{
+        let mut items: [Items; 2] = [Items::Error, Items::Error];
+        for i in 0..1{
+            let check = self.scriptvec.pop();
+            match check {
+                None =>{
+                    return Items::Error;
+                }
+                Some(item) =>{
+                    match item {
+                        Items::Recursion(recursion) =>{
+                            let mut subvm = Vectvm::init();
+                            subvm.push(*recursion);
+                            subvm.rewind();
+                            items[i] = subvm.evaluate();
+                        }
+                        Items::Number(number) =>{
+                            items[i] = Items::Number(number)
+                        }
+                        _ =>{
+                            return Items::Error
+                        }
+                    }
+                }
+            }
+        }
+
+        let (value1, value2) = (items[0].popnumber(), items[1].popnumber());
+        
+        let result: Items = match calculation {
+            Calculation::Add =>{
+                Items::Number(value1.add(value2))
+            }
+            Calculation::Min =>{
+                todo!("暂未实现")
+            }
+            Calculation::Mul =>{
+                todo!("暂未实现")
+            }
+            Calculation::Div =>{
+                todo!("暂未实现")
+            }
+            Calculation::IntDiv =>{
+                todo!("暂未实现")
+            }
+            Calculation::Rmd =>{
+                todo!("暂未实现")
+            }
+        };
+        return result;
+    }
 }
+
