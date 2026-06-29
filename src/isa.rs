@@ -2,7 +2,7 @@
 pub enum Instructions{
     Add,
     Jump,
-    Lgr,
+    Larger,
 }
 
 #[derive(Clone)]

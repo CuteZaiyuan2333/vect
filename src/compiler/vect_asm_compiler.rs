@@ -233,7 +233,7 @@ fn parse_instruction(name: &str) -> Result<Instructions, String> {
     match name {
         "add" => Ok(Instructions::Add),
         "jump" => Ok(Instructions::Jump),
-        "lgr" => Ok(Instructions::Lgr),
+        "larger" => Ok(Instructions::Larger),
         _ => Err(format!("unknown instruction '{name}'")),
     }
 }
