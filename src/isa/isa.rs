@@ -1,23 +1,21 @@
 use crate::isa::{
     calculations::*,
     numbers::*,
+    logicflow::*,
 };
 
 #[derive(Clone)]
 pub enum Instructions{
-    // Add,
     Cal(Calculation),
-    Jump,
-    Larger,
+    Jump(Logic),
 }
-
-
 
 #[derive(Clone)]
 pub enum Items{
     Element(Instructions),
     Number(Types),
     Recursion(Box<Vec<Items>>),
+    Label(String),
     Error,
 }impl Items{
     pub fn popnumber(self: &Self) ->Types{

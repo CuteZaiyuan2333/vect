@@ -1,5 +1,6 @@
 #[derive(Clone)]
 pub enum Types{
+    Bool(bool),
     I32(i32),
     F32(f32),
     I64(i64),

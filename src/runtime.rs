@@ -7,13 +7,15 @@ use crate::isa::{
 };
 
 pub struct Vectvm{
-    scriptvec: Vec<Items>,
+    mainvec: Vec<Items>,
     dropvec: Vec<Items>,
+    _tempvec: Vec<Items>,
 }impl Vectvm{
     pub fn init() -> Self{
         Self{
-            scriptvec: Vec::new(),
+            mainvec: Vec::new(),
             dropvec: Vec::new(),
+            _tempvec: Vec::new(),
         }
     }
     
@@ -30,7 +32,7 @@ pub struct Vectvm{
                 }
                 Some(_) =>{
                     let item = check.unwrap();
-                    self.scriptvec.push(item);
+                    self.mainvec.push(item);
                 }
             }
         }
@@ -38,7 +40,7 @@ pub struct Vectvm{
     
     pub fn evaluate(self: &mut Self) -> Items{
         //检查是否为空
-        let check = self.scriptvec.pop();
+        let check = self.mainvec.pop();
         self.dropvec.push(check.clone().unwrap());
         match check{
             None => {
@@ -97,21 +99,18 @@ pub struct Vectvm{
     pub fn dec(self: &mut Self, instruction: Instructions) -> Items{
         match instruction {
             Instructions::Cal(calculation) =>{
-                return self.alu(calculation);
+                return self.cond_and_alu(calculation);
             }
-            Instructions::Jump =>{
-                todo!("暂未实现")
-            }
-            Instructions::Larger =>{
+            Instructions::Jump(_op) =>{
                 todo!("暂未实现")
             }
         }
     }
 
-    pub fn alu(self: &mut Self, calculation: Calculation) -> Items{
+    pub fn cond_and_alu(self: &mut Self, calculation: Calculation) -> Items{
         let mut items: [Items; 2] = [Items::Error, Items::Error];
         for i in 0..1{
-            let check = self.scriptvec.pop();
+            let check = self.mainvec.pop();
             match check {
                 None =>{
                     return Items::Error;
