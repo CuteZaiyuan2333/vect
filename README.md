@@ -1,75 +1,157 @@
 # Vect
 
-An experimental stack virtual machine with an unusual execution model: scripts are stored, rewound, and evaluated on demand through nested sub-VMs.
+Vect is an experimental Rust stack VM. Its core idea is to treat program
+fragments as values: a script can contain numbers, instructions, labels, and
+nested recursive blocks, and evaluation can spawn sub-VMs to resolve those
+blocks only when an instruction needs them.
 
-**Status: early development.** A minimal proof-of-concept VM and assembler compiler exist today. Only a three-instruction test ISA is wired up; a full-featured VM and compiler are still ahead.
+**Status: early development.** The ISA shape and runtime prototype are changing
+quickly. Recent work has moved comparison into the calculation system, added
+numeric/boolean calculation enums, and introduced `mainvec`/`tempvec` as part of
+the execution model. The assembler parser is currently not wired in; the parser
+code in `src/compiler/vect_asm_compiler.rs` is commented out while the runtime
+and ISA are being redesigned.
 
-## The idea
+## Design Direction
 
-Most VMs separate *compilation* (source → bytecode) from *execution* (fetch/decode/run in a flat instruction stream). Vect blurs that line:
+Most virtual machines run a flat stream of bytecode. Vect is exploring a more
+data-like execution model:
 
-1. **Dual buffers** — A script lives in `dropvec`, then is **rewound** into `scriptvec` (execution stack). Items popped during evaluation are pushed back into `dropvec`, forming an execution trace.
-2. **Replay by rewind** — To re-run a script, call `rewind()` again. No recompilation required. This also sets the stage for control flow (e.g. loops and jumps) without throwing away program state.
-3. **Recursion as sub-programs** — Nested expressions are not a separate AST pass. They are stored as `Recursion` items (deferred sub-scripts). When evaluation needs one, it **spawns a fresh `Vectvm`**, loads the sub-script, and lets that instance evaluate itself. Instructions and operands can both be recursive; each branch resolves independently at the point of use.
+1. **Program as vectors** - script items are stored in `dropvec`, rewound into
+   `mainvec`, and evaluated from there. Items popped during evaluation are also
+   recorded back into `dropvec`, so the VM keeps an execution trail that can be
+   rewound again.
+2. **Lazy recursive blocks** - nested expressions are represented as
+   `Items::Recursion(Box<Vec<Items>>)`. When an instruction needs a value from a
+   recursive block, Vect creates a fresh `Vectvm`, loads that block, rewinds it,
+   and evaluates it independently.
+3. **Calculations as a shared path** - arithmetic, boolean operations, and
+   comparisons are all modeled as `Calculation` variants. Comparisons are no
+   longer independent VM instructions; they produce `Types::Bool` through the
+   calculation path.
+4. **Temporary storage for variables** - `tempvec` and the `Push` instruction
+   are the current direction for storing intermediate items so scripts can later
+   express variable-like behavior.
 
-The result is a lazy, stack-based evaluator where the program is both data and executable structure.
+## Current Data Model
 
-## Script format
+The main runtime values are defined in `src/isa/isa.rs`:
 
-Scripts use parenthesized, comma-separated groups (S-expression style):
+```rust
+pub enum Instructions {
+    Cal(Calculation),
+    Jump(Logic),
+    Push,
+}
 
+pub enum Items {
+    Element(Instructions),
+    Number(Types),
+    Recursion(Box<Vec<Items>>),
+    Label(String),
+    Empty,
+    Error,
+}
 ```
+
+Numbers and booleans are carried by `Types` in `src/isa/numbers.rs`:
+
+```rust
+pub enum Types {
+    Bool(bool),
+    I32(i32),
+    F32(f32),
+    I64(i64),
+    F64(f64),
+    Error,
+}
+```
+
+## Calculation ISA
+
+The calculation layer currently has three groups:
+
+| Group | Variants | Result |
+| --- | --- | --- |
+| `NumberCal` | `Add`, `Sub`, `Mul`, `Div`, `Qtt`, `Rmd` | numeric `Types` |
+| `BoolCal` | `And`, `Or`, `Not1`, `Not2`, `NotSidd` | `Types::Bool` or TODO |
+| `Compare` | `Lgr`, `Les`, `Eql`, `Eqlgr`, `Eqles` | `Types::Bool` |
+
+Notes:
+
+- `Qtt` is integer/euclidean quotient-style division.
+- `Rmd` is remainder/modulo-style calculation.
+- `NotSidd` is declared but still marked `todo!()` in the runtime.
+- `Jump(Logic)` exists in the ISA, but jump execution is still `todo!()`.
+
+## Script Shape
+
+The planned assembly format is still an S-expression-like layout:
+
+```text
 (add, (add, 1, (add, 2, 3)), 4)
 ```
 
-After compilation, the top-level group becomes a flat `Vec<Items>` with three kinds of nodes: instructions, numbers, and nested `Recursion` blocks.
+Conceptually, this becomes a `Vec<Items>` where each item is an instruction, a
+typed value, a label, or a recursive sub-script. The old compiler prototype can
+parse a similar shape, but it is currently commented out and still refers to the
+older instruction model, so this format should be treated as the design target
+rather than a working user-facing language.
 
-## Instruction set (test ISA)
+## Runtime Progress
 
-| Instruction | Operands        | Result |
-|-------------|-----------------|--------|
-| `add`       | `isize`, `isize` | `isize` |
-| `lgr`       | `isize`, `isize` | `bool`  |
-| `jump`      | `bool`, `usize`  | control flow |
+| Component | Current state |
+| --- | --- |
+| `Vectvm` | Prototype with `mainvec`, `dropvec`, `tempvec`, `rewind`, `evaluate`, and calculation dispatch |
+| Numeric ALU | Implemented for `I32`, `I64`, `F32`, `F64`, including mixed numeric type promotion |
+| Boolean ALU | `And`, `Or`, `Not1`, `Not2` implemented for `Bool`; `NotSidd` still TODO |
+| Compare/condition path | `Lgr`, `Les`, `Eql`, `Eqlgr`, `Eqles` implemented as calculations returning `Bool` |
+| `Push` | Added as the first step toward temp storage / variables |
+| `Jump` / logic flow | Declared but not implemented |
+| Assembler compiler | Old prototype is present but commented out and out of date |
+| Tests | `cargo test` passes, but there are currently no active tests |
 
-Example (conceptual):
+## Project Layout
 
+```text
+src/
+  main.rs                         binary entry point placeholder
+  lib.rs                          public module exports
+  runtime.rs                      Vectvm runtime prototype
+  isa/
+    isa.rs                        Instructions and Items
+    numbers.rs                    Types and numeric/bool/compare operations
+    calculations.rs               calculation enums
+    logicflow.rs                  placeholder logic-flow enum
+  compiler/
+    vect_asm_compiler.rs          old commented-out parser prototype
 ```
-(jump, (lgr, (add, (add, 1, 2), 3), (add, 1, 1)), addr)
+
+## Run
+
+Build and run the placeholder binary:
+
+```bash
+cargo run
 ```
 
-## Current progress
-
-| Component | State |
-|-----------|-------|
-| `Vectvm` runtime | Working prototype — `add` implemented and tested |
-| `lgr`, `jump` | Stubs only (`todo!`) |
-| `VectAsmCompiler` | Lexer + parser for nested scripts; outputs `Vec<Items>` |
-| Full ISA / tooling | Not started |
-
-Run tests:
+Run the current test suite:
 
 ```bash
 cargo test
 ```
 
-## Project layout
-
-```
-src/
-  isa.rs                  — Instructions and Items
-  runtime.rs              — Vectvm (dropvec, scriptvec, evaluate, rewind)
-  compiler/
-    vect_asm_compiler.rs  — Vect assembly parser
-```
+At the moment, `cargo test` verifies compilation only because there are no
+active unit tests.
 
 ## Roadmap
 
-- Finish `lgr` and `jump` in the runtime
-- Define jump addressing semantics (offset into `dropvec` / script position)
-- Expand the instruction set and compiler
-- Build a complete, production-ready VM and assembler
+- Reconnect or rewrite the assembler compiler so it targets the current
+  `Instructions::Cal(Calculation)` model.
+- Add active tests for `NumberCal`, `BoolCal`, `Compare`, recursion evaluation,
+  `Push`, and error cases.
+- Finish operand handling and error behavior in calculation dispatch.
+- Define variable/temp storage semantics around `tempvec` and `Push`.
+- Design and implement `Jump(Logic)` and label/address semantics.
+- Decide the public syntax names for the new calculation variants.
 
----
-
-Contributions and design feedback welcome while the architecture is still taking shape.
