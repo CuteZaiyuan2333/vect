@@ -402,3 +402,302 @@ impl Types{
         }
     }
 }
+
+//compare
+impl Types{
+    pub fn lgr(self, input: Types) -> Types{
+        match (self, input) {
+            (Types::I32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 > value2);
+            }
+            (Types::I64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 > value2);
+            }
+            (Types::F32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 > value2);
+            }
+            (Types::F64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 > value2);
+            }
+
+            (Types::I32(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 as i64 > value2);
+            }
+            (Types::I64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 > value2 as i64);
+            }
+            (Types::F32(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 as f64 > value2);
+            }
+            (Types::F64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 > value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 as f32 > value2);
+            }
+            (Types::I64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 as f64 > value2);
+            }
+            (Types::F32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 > value2 as f32);
+            }
+            (Types::F64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 > value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 as f64 > value2);
+            }
+            (Types::I64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 as f64 > value2 as f64);
+            }
+            (Types::F32(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 as f64 > value2 as f64);
+            }
+            (Types::F64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 as f64 > value2 as f64);
+            }
+
+            _ =>{
+                return Types::Error;
+            }
+        }
+    }
+    pub fn les(self, input: Types) -> Types{
+        match (self, input) {
+            (Types::I32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 < value2);
+            }
+            (Types::I64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 < value2);
+            }
+            (Types::F32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 < value2);
+            }
+            (Types::F64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 < value2);
+            }
+
+            (Types::I32(value1), Types::I64(value2)) =>{
+                return Types::Bool((value1 as i64) < value2);
+            }
+            (Types::I64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 < value2 as i64);
+            }
+            (Types::F32(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) < value2);
+            }
+            (Types::F64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 < value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F32(value2)) =>{
+                return Types::Bool((value1 as f32) < value2);
+            }
+            (Types::I64(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) < value2);
+            }
+            (Types::F32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 < value2 as f32);
+            }
+            (Types::F64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 < value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) < value2);
+            }
+            (Types::I64(value1), Types::F32(value2)) =>{
+                return Types::Bool((value1 as f64) < value2 as f64);
+            }
+            (Types::F32(value1), Types::I64(value2)) =>{
+                return Types::Bool((value1 as f64) < value2 as f64);
+            }
+            (Types::F64(value1), Types::I32(value2)) =>{
+                return Types::Bool((value1 as f64) < value2 as f64);
+            }
+
+            _ =>{
+                return Types::Error;
+            }
+        }
+    }
+    pub fn eql(self, input: Types) -> Types{
+        match (self, input) {
+            (Types::I32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 == value2);
+            }
+            (Types::I64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 == value2);
+            }
+            (Types::F32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 == value2);
+            }
+            (Types::F64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 == value2);
+            }
+
+            (Types::I32(value1), Types::I64(value2)) =>{
+                return Types::Bool((value1 as i64) == value2);
+            }
+            (Types::I64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 == value2 as i64);
+            }
+            (Types::F32(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) == value2);
+            }
+            (Types::F64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 == value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F32(value2)) =>{
+                return Types::Bool((value1 as f32) == value2);
+            }
+            (Types::I64(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) == value2);
+            }
+            (Types::F32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 == value2 as f32);
+            }
+            (Types::F64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 == value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) == value2);
+            }
+            (Types::I64(value1), Types::F32(value2)) =>{
+                return Types::Bool((value1 as f64) == value2 as f64);
+            }
+            (Types::F32(value1), Types::I64(value2)) =>{
+                return Types::Bool((value1 as f64) == value2 as f64);
+            }
+            (Types::F64(value1), Types::I32(value2)) =>{
+                return Types::Bool((value1 as f64) == value2 as f64);
+            }
+
+            _ =>{
+                return Types::Error;
+            }
+        }
+    }
+    pub fn eqlgr(self, input: Types) -> Types{
+        match (self, input) {
+            (Types::I32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 >= value2);
+            }
+            (Types::I64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 >= value2);
+            }
+            (Types::F32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 >= value2);
+            }
+            (Types::F64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 >= value2);
+            }
+
+            (Types::I32(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 as i64 >= value2);
+            }
+            (Types::I64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 >= value2 as i64);
+            }
+            (Types::F32(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 as f64 >= value2);
+            }
+            (Types::F64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 >= value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 as f32 >= value2);
+            }
+            (Types::I64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 as f64 >= value2);
+            }
+            (Types::F32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 >= value2 as f32);
+            }
+            (Types::F64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 >= value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 as f64 >= value2);
+            }
+            (Types::I64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 as f64 >= value2 as f64);
+            }
+            (Types::F32(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 as f64 >= value2 as f64);
+            }
+            (Types::F64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 as f64 >= value2 as f64);
+            }
+
+            _ =>{
+                return Types::Error;
+            }
+        }
+    }
+    pub fn eqles(self, input: Types) -> Types{
+        match (self, input) {
+            (Types::I32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 <= value2);
+            }
+            (Types::I64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 <= value2);
+            }
+            (Types::F32(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 <= value2);
+            }
+            (Types::F64(value1), Types::F64(value2)) =>{
+                return Types::Bool(value1 <= value2);
+            }
+
+            (Types::I32(value1), Types::I64(value2)) =>{
+                return Types::Bool((value1 as i64) <= value2);
+            }
+            (Types::I64(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 <= value2 as i64);
+            }
+            (Types::F32(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) <= value2);
+            }
+            (Types::F64(value1), Types::F32(value2)) =>{
+                return Types::Bool(value1 <= value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F32(value2)) =>{
+                return Types::Bool((value1 as f32) <= value2);
+            }
+            (Types::I64(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) <= value2);
+            }
+            (Types::F32(value1), Types::I32(value2)) =>{
+                return Types::Bool(value1 <= value2 as f32);
+            }
+            (Types::F64(value1), Types::I64(value2)) =>{
+                return Types::Bool(value1 <= value2 as f64);
+            }
+
+            (Types::I32(value1), Types::F64(value2)) =>{
+                return Types::Bool((value1 as f64) <= value2);
+            }
+            (Types::I64(value1), Types::F32(value2)) =>{
+                return Types::Bool((value1 as f64) <= value2 as f64);
+            }
+            (Types::F32(value1), Types::I64(value2)) =>{
+                return Types::Bool((value1 as f64) <= value2 as f64);
+            }
+            (Types::F64(value1), Types::I32(value2)) =>{
+                return Types::Bool((value1 as f64) <= value2 as f64);
+            }
+
+            _ =>{
+                return Types::Error;
+            }
+        }
+    }
+}

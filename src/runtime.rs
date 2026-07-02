@@ -1,6 +1,6 @@
 use crate::isa::{
     calculations::{
-        BoolCalculation, Calculation, NumberCalculation
+        BoolCalculation, Calculation, Compare, NumberCalculation
     }, 
     isa::{
         Instructions,
@@ -109,7 +109,11 @@ pub struct Vectvm{
             }
         };
     }
+}
 
+
+//calculations
+impl Vectvm{
     pub fn dec(self: &mut Self, instruction: Instructions) -> Items{
         match instruction {
             Instructions::Cal(calculation) =>{
@@ -160,11 +164,11 @@ pub struct Vectvm{
             Calculation::NumberCal(op) =>{
                 self.alu(value1, value2, op)
             }
-            Calculation::BoolCal(_) =>{
-                todo!()
+            Calculation::BoolCal(op) =>{
+                self.boolalu(value1, value2, op)
             }
-            Calculation::Compare(_) =>{
-                todo!()
+            Calculation::Compare(op) =>{
+                self.cond(value1, value2, op)
             }
         };
         return result;
@@ -208,6 +212,25 @@ pub struct Vectvm{
             BoolCalculation::NotSidd =>{
                 todo!("processing a two value recursion is currently not availible");
                 //Items::Recursion(Box::new(vec![Items::Number(value1.not()), Items::Number(value2.not())]))
+            }
+        }
+    }
+    pub fn cond(self: &mut Self, value1: Types, value2: Types, op: Compare) -> Items{
+        match op {
+            Compare::Lgr =>{
+                Items::Number(value1.lgr(value2))
+            }
+            Compare::Les =>{
+                Items::Number(value1.les(value2))
+            }
+            Compare::Eql =>{
+                Items::Number(value1.eql(value2))
+            }
+            Compare::Eqlgr =>{
+                Items::Number(value1.eqlgr(value2))
+            }
+            Compare::Eqles =>{
+                Items::Number(value1.eqles(value2))
             }
         }
     }
