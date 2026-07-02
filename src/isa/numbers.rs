@@ -6,7 +6,9 @@ pub enum Types{
     I64(i64),
     F64(f64),
     Error,
-}impl Types{
+}
+//number calculations
+impl Types{
     pub fn add(self, input: Types) -> Types{
         match (self, input) {
             (Types::I32(value1), Types::I32(value2)) =>{
@@ -359,6 +361,44 @@ pub enum Types{
             _ =>{
                 return Types::Error;
             }
+        }
+    }
+}
+
+//boolean calculations
+impl Types{
+    pub fn and(self, input: Types) -> Types{
+        match self {
+            Types::Bool(value1) =>{
+                match input {
+                    Types::Bool(value2) =>{
+                        return Types::Bool(value1 & value2);
+                    }
+                    _ => Types::Error
+                }
+            }
+            _ => Types::Error
+        }
+    }
+    pub fn or(self, input: Types) -> Types{
+        match self {
+            Types::Bool(value1) =>{
+                match input {
+                    Types::Bool(value2) =>{
+                        return Types::Bool(value1 || value2);
+                    }
+                    _ => Types::Error
+                }
+            }
+            _ => Types::Error
+        }
+    }
+    pub fn not(self) -> Types{
+        match self {
+            Types::Bool(value1) =>{
+                return Types::Bool(!value1)
+            }
+            _ => Types::Error
         }
     }
 }

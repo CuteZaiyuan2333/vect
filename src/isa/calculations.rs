@@ -19,7 +19,9 @@ pub enum NumberCalculation{
 pub enum BoolCalculation{
     And,
     Or,
-    Not,
+    Not1,
+    Not2,
+    NotSidd,
 }
 
 #[derive(Clone)]

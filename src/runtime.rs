@@ -1,7 +1,6 @@
 use crate::isa::{
     calculations::{
-        Calculation,
-        NumberCalculation,
+        BoolCalculation, Calculation, NumberCalculation
     }, 
     isa::{
         Instructions,
@@ -189,6 +188,26 @@ pub struct Vectvm{
             }
             NumberCalculation::Rmd =>{
                 Items::Number(value1.rmd(value2))
+            }
+        }
+    }
+    pub fn boolalu(self: &mut Self, value1: Types, value2: Types, op: BoolCalculation) -> Items{
+        match op {
+            BoolCalculation::And =>{
+                Items::Number(value1.and(value2))
+            }
+            BoolCalculation::Or =>{
+                Items::Number(value1.or(value2))
+            }
+            BoolCalculation::Not1 =>{
+                Items::Number(value1.not())
+            }
+            BoolCalculation::Not2 =>{
+                Items::Number(value2.not())
+            }
+            BoolCalculation::NotSidd =>{
+                todo!("processing a two value recursion is currently not availible");
+                //Items::Recursion(Box::new(vec![Items::Number(value1.not()), Items::Number(value2.not())]))
             }
         }
     }
