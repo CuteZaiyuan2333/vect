@@ -175,20 +175,20 @@ pub struct Vectvm{
             NumberCalculation::Add =>{
                 Items::Number(value1.add(value2))
             }
-            NumberCalculation::Min =>{
-                todo!("暂未实现")
+            NumberCalculation::Sub =>{
+                Items::Number(value1.sub(value2))
             }
             NumberCalculation::Mul =>{
-                todo!("暂未实现")
+                Items::Number(value1.mul(value2))
             }
             NumberCalculation::Div =>{
-                todo!("暂未实现")
+                Items::Number(value1.div(value2))
             }
             NumberCalculation::Qtt =>{
-                todo!("暂未实现")
+                Items::Number(value1.qtt(value2))
             }
             NumberCalculation::Rmd =>{
-                todo!("暂未实现")
+                Items::Number(value1.rmd(value2))
             }
         }
     }

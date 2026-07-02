@@ -8,7 +8,7 @@ pub enum Calculation{
 #[derive(Clone)]
 pub enum NumberCalculation{
     Add,
-    Min,
+    Sub,
     Mul,
     Div,
     Qtt,
