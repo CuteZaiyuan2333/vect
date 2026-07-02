@@ -8,6 +8,7 @@ use crate::isa::{
 pub enum Instructions{
     Cal(Calculation),
     Jump(Logic),
+    Push,
 }
 
 #[derive(Clone)]
@@ -16,6 +17,7 @@ pub enum Items{
     Number(Types),
     Recursion(Box<Vec<Items>>),
     Label(String),
+    Empty,
     Error,
 }impl Items{
     pub fn popnumber(self: &Self) ->Types{

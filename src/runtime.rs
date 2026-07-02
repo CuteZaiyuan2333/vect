@@ -1,21 +1,24 @@
 use crate::isa::{
-    calculations::Calculation, 
+    calculations::{
+        Calculation,
+        NumberCalculation,
+    }, 
     isa::{
         Instructions,
         Items,
-    },
+    }, numbers::Types,
 };
 
 pub struct Vectvm{
     mainvec: Vec<Items>,
     dropvec: Vec<Items>,
-    _tempvec: Vec<Items>,
+    tempvec: Vec<Items>,
 }impl Vectvm{
     pub fn init() -> Self{
         Self{
             mainvec: Vec::new(),
             dropvec: Vec::new(),
-            _tempvec: Vec::new(),
+            tempvec: Vec::new(),
         }
     }
     
@@ -36,6 +39,10 @@ pub struct Vectvm{
                 }
             }
         }
+    }
+
+    pub fn execute(self: &mut Self){
+        
     }
     
     pub fn evaluate(self: &mut Self) -> Items{
@@ -75,8 +82,13 @@ pub struct Vectvm{
                                 }
                             }
                             //是指令则返回指令
-                            Items::Element(instruction) => Items::Element(instruction),
+                            Items::Element(instruction) => {
+                                Items::Element(instruction)
+                            }
                             //不具备实际意义，只是为了满足match的要求
+                            Items::Empty =>{
+                                Items::Empty
+                            }
                             _ => {
                                 return Items::Error;
                             }
@@ -85,6 +97,9 @@ pub struct Vectvm{
                         match op{
                             Items::Element(instruction) =>{
                                 return self.dec(instruction);
+                            }
+                            Items::Empty =>{
+                                return Items::Empty;
                             }
                             _ =>{
                                 return Items::Error;
@@ -99,15 +114,21 @@ pub struct Vectvm{
     pub fn dec(self: &mut Self, instruction: Instructions) -> Items{
         match instruction {
             Instructions::Cal(calculation) =>{
-                return self.cond_and_alu(calculation);
+                return self.mux(calculation);
             }
             Instructions::Jump(_op) =>{
                 todo!("暂未实现")
             }
+            Instructions::Push =>{
+                let temp = self.mainvec.pop().unwrap();
+                self.dropvec.push(temp.clone());
+                self.tempvec.push(temp);
+                return Items::Empty;
+            }
         }
     }
 
-    pub fn cond_and_alu(self: &mut Self, calculation: Calculation) -> Items{
+    pub fn mux(self: &mut Self, calculation: Calculation) -> Items{
         let mut items: [Items; 2] = [Items::Error, Items::Error];
         for i in 0..1{
             let check = self.mainvec.pop();
@@ -137,26 +158,39 @@ pub struct Vectvm{
         let (value1, value2) = (items[0].popnumber(), items[1].popnumber());
         
         let result: Items = match calculation {
-            Calculation::Add =>{
-                Items::Number(value1.add(value2))
+            Calculation::NumberCal(op) =>{
+                self.alu(value1, value2, op)
             }
-            Calculation::Min =>{
-                todo!("暂未实现")
+            Calculation::BoolCal(_) =>{
+                todo!()
             }
-            Calculation::Mul =>{
-                todo!("暂未实现")
-            }
-            Calculation::Div =>{
-                todo!("暂未实现")
-            }
-            Calculation::IntDiv =>{
-                todo!("暂未实现")
-            }
-            Calculation::Rmd =>{
-                todo!("暂未实现")
+            Calculation::Compare(_) =>{
+                todo!()
             }
         };
         return result;
+    }
+    pub fn alu(self: &mut Self, value1: Types, value2: Types, op: NumberCalculation) -> Items{
+        match op {
+            NumberCalculation::Add =>{
+                Items::Number(value1.add(value2))
+            }
+            NumberCalculation::Min =>{
+                todo!("暂未实现")
+            }
+            NumberCalculation::Mul =>{
+                todo!("暂未实现")
+            }
+            NumberCalculation::Div =>{
+                todo!("暂未实现")
+            }
+            NumberCalculation::Qtt =>{
+                todo!("暂未实现")
+            }
+            NumberCalculation::Rmd =>{
+                todo!("暂未实现")
+            }
+        }
     }
 }
 
